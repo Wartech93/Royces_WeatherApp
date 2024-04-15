@@ -9,25 +9,31 @@
     <title>Royce's Weather App</title>
 </head>
 
-<body>
-    <nav class="navbar d-flex text-bg-primary position-relative">
+<body class="bg-secondary">
+    <nav class="navbar d--sm-flex text-bg-primary position-relative">
         <div class="container-fluid justify-content-center">
             <a class="navbar-brand" href="#">Royce's Weather App</a>
 
         </div>
     </nav>
-    <main>
-        <aside>
-            <div class="d-inline-flex col m-3 w-25">
-                <label for="formGroupExampleInput" class="col-form-label ">Search</label>
-                <input type="text" class="col-sm-2 form-control" id="weather-input" placeholder="City">
-                <button type="button" class="btn btn-primary" id="search-btn">Search</button>
-            </div>            
-            <div class="col" id="city-history"></div>
-       
-        </aside>
+    <aside>
+        <div class="d-md-inline-flex justify-content-start col m-3 w-25">
+            <label for="weather-input" class="col-form-label ">Search </label>
+            <input type="text" class="col-sm-2 form-control" id="weather-input" placeholder="City">
+            <button type="button" class="btn btn-primary" id="search-btn">Search</button>
+        </div>
+        <div class="d-sm-flex col" id="city-history"></div>
 
+    </aside>
+    <main class="container justify-content-end d-md-flex ">
+        <div class="col text-center" id="weather-title">Your Weather</div>
+        <section>
+            <div class="col" id="current-weather"></div>
+            <div class="col" id="forecast-weather"></div>
+        </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script>dayjs().format()</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
