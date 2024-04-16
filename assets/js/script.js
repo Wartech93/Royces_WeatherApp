@@ -15,7 +15,8 @@ const formSubmitHandler = function (event) {
     const cityInputValue = cityInput.value.trim();
     const city = capitalizeFirstLetter(cityInputValue);
     if (city) {
-        weatherSearch();
+        weatherSearch(city);
+        savedCities();
 
         cityInput.value = '';
     } else {
@@ -24,17 +25,14 @@ const formSubmitHandler = function (event) {
 
 }
 
-//add a city
 
-//get past cities
-function getPastCitySearches() {
-    const pastCities = JSON.parse(localStorage.getItem('cities'));
-}
+
+
 // past cities array handler 
-const pastCitiesArrayHandler = function () {
+const pastCitiesArrayHandler = function (city) {
     let weatherHistory = JSON.parse(localStorage.getItem('cities')) || [];
 
-    weatherHistory.push(cities);
+    weatherHistory.push(city);
 
     localStorage.setItem('pastCities', JSON.stringify(weatherHistory));
 
@@ -54,7 +52,7 @@ const weatherSearch = function (city) {
                 //clearDivsubtitleDisplay();
                 pastCitiesArrayHandler(city);
                 localStorage.setItem('cities', JSON.stringify(pastCities))
-                //  cityHistory()
+                //cityHistory()
                 //parse data
                 response.json()
                     .then(function (data) {
@@ -87,7 +85,7 @@ const forecastSearch = function (city) {
             localStorage.setItem('forecast', (JSON.stringify(data)));
         })
         .catch(function (error) {
-            console.error('There was a problem witht the fetch operation:', error);
+            console.error('There was a problem with the fetch operation:', error);
         });   
     
     };
@@ -121,26 +119,25 @@ const displayWeather = function (data) {
 const displayForecast = function (data) {
     for (let i = 0; i <= 4; i++) {
         //create div
-        const weatherForecast = document.createElement('div')
-        //add attributes
-        weatherForecast.setAttribute('id', 'card')
+        const forecastCard = document.createElement('div');
+        forecastCard.setAttribute('class', 'forecast-card d-flex flex-column m-1');
 
         //create elements
-        const cityDateEl = document.createElement('h4')
-        const iconEl = document.createElement('h5')
-        const cityTempEl = document.createElement('h5')
-        const cityHumidityEl = document.createElement('h5')
+        const cityDateEl = document.createElement('h4');
+        const iconEl = document.createElement('h5');
+        const cityTempEl = document.createElement('h5');
+        const cityHumidityEl = document.createElement('h5');
+        const cityWindEl = document.createElement('h5');
 
         //get date
-        const date = forecastDate(i)
+        const date = forecastDate(i);
 
         //add text to each element
-        cityDateEl.textContent = `${date}`
-        iconEl.textContent = icon;
-        //conver tempt from kelvin to fahrenheit
+        cityDateEl.textContent = `${date}`;
+        iconEl.textContent = weatherIcon(data.list[i]); // Pass data for each day to weatherIcon
         const cityTemp = (data.list[i].main.temp - 273.15) * (9 / 5) + 32;
-        cityTempEl.textContent = `Temp: ${cityTemp.toFixed(2)} °F`;
-        cityWindEl.textContent = `Wind: ${data.list[i].wind.speed} MPH`;
+        cityTempEl.textContent = `Temp: ${cityTemp.toFixed(2)} °F` + ` `;
+        cityWindEl.textContent = `Wind: ${data.list[i].wind.speed} MPH` + ` `;
         cityHumidityEl.textContent = `Humidity: ${data.list[i].main.humidity} %`;
 
         //append all elements to card
@@ -149,10 +146,12 @@ const displayForecast = function (data) {
         forecastCard.appendChild(cityTempEl);
         forecastCard.appendChild(cityWindEl);
         forecastCard.appendChild(cityHumidityEl);
+        
+        
         //append the card to html
-        forecastElement.appendChild(weatherForecast);
+        forecastElement.appendChild(forecastCard);
     }
-}
+};
 //day JS function for future dates
 const forecastDate = function (i) {
     let today = dayjs();
@@ -165,11 +164,82 @@ const forecastDate = function (i) {
 function capitalizeFirstLetter(city) {
     return city.charAt(0).toUpperCase() + city.slice(1);
 }
+//weather icons
+const weatherIcon = function (data) {
+    if (data.weather && data.weather.length > 0) {
+        const iconCode = data.weather[0].icon;
 
-
+        switch (iconCode) {
+            case '01d':
+                return '☀️'; // clear sky day
+            case '01n':
+                return '🌙'; // clear sky night
+            case '02d':
+                return '🌤️'; // few clouds day
+            case '02n':
+                return '🌥️'; // few clouds night
+            case '03d':
+            case '03n':
+                return '🌥️'; // scattered clouds
+            case '04d':
+            case '04n':
+                return '☁️'; // broken clouds
+            case '09d':
+            case '09n':
+                return '🌧️'; // shower rain
+            case '10d':
+                return '🌦️'; // rain day
+            case '10n':
+                return '🌧️'; // rain night
+            case '11d':
+            case '11n':
+                return '⛈️'; // thunderstorm
+            case '13d':
+            case '13n':
+                return '❄️'; // snow
+            case '50d':
+            case '50n':
+                return '🌫️'; // mist
+            default:
+                return '❓'; // default icon for unknown conditions
+        }
+    } else {
+        return '❓'; // default icon if weather data is not available
+    }
+};
 //function to get input from event listener on button and display weather data
 searchBtn.addEventListener('click', formSubmitHandler);
 //function to clear div/
+
+//display search history
+const savedCities = function () {
+    let historyInput = cityInput.value;
+    let cityHistory = JSON.parse(localStorage.getItem("cityHistory")) || [];
+    cityHistory.push(historyInput);
+    localStorage.setItem("cityHistory", JSON.stringify(cityHistory));
+    displayPastCities(cityHistory);
+    console.log(cityHistory);
+}
+
+const displayPastCities = function (cityHistory) {
+    const historyContainer = document.querySelector("#city-history");
+    historyContainer.innerHTML = ""; // Clear previous content
+
+    cityHistory.forEach(city => {
+        const historyButton = document.createElement("button");
+        historyButton.textContent = city;
+        historyButton.setAttribute('class', 'btn btn-info d-flex text-center flex-column my-1');
+        historyButton.classList.add("past"); // Use classList.add instead of += for adding classes
+        historyContainer.appendChild(historyButton);
+
+        historyButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            let pastCity = historyButton.textContent;
+            weatherSearch(pastCity);
+            clearDiv();
+        });
+    });
+};
 const clearDiv = function () {
     weatherElement.innerHTML = ''
     forecastElement.innerHTML = ''
